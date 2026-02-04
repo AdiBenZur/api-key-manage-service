@@ -20,4 +20,23 @@ Implementing the validation logic for incoming requests:
 - Endpoint: GET /auth/verify
 - Header: x-api-key: <prefix.secret>
 - Logic: Verify if the prefix exists, compare the hash, and check that revokedAt is null
+
+## Project Structure
   
+```
+api-key-manage-service/
+├── controllers/         # Request handling and input validation
+│   └── apiKeyController.ts
+├── routes/              # API route definitions and mapping
+│   └── apiKeyRoutes.ts
+├── services/            # Logic and database interactions
+│   └── apiKeyService.ts
+├── prisma/              # Database schema and migrations
+│   ├── migrations/      # Deterministic DB version history
+│   └── schema.prisma    # Data models (ApiKey)
+├── docker-compose.yml   # Infrastructure (PostgreSQL container)
+├── env.example          # Template for environment variables
+├── index.ts             # Application entry point
+├── package.json         # Project metadata and scripts
+└── tsconfig.json        # TypeScript configuration
+```
