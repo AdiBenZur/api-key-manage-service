@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { handleCreateKey , handleListKeys, handleRevokeKey } from '../controllers/apiKeyController.js';
+import { handleCreateKey , handleListKeys, handleRevokeKey, handleVerifyKey } from '../controllers/apiKeyController.js';
 
 const router = Router();
 
@@ -11,5 +11,7 @@ router.get('/accounts/:accountId/keys', handleListKeys);
 
 // Third endpoint
 router.post('/accounts/:accountId/keys/:id/revoke', handleRevokeKey);
+
+router.get('/auth/verify', handleVerifyKey)
 
 export default router;

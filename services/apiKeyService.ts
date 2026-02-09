@@ -80,5 +80,40 @@ export const revokeKey = async (accountId: string, keyId: string) => {
             revokedAt: true
         }
     });
-
 };
+
+/////////////////////////////////// Forth service ///////////////////////////////////
+export const verifyApiKey = async (fullKey: string) => {
+    const [prefix, secret] = fullKey.split('.');
+    
+    if (!prefix || !secret) {
+        return {valid: false, errorType: 'INVALID_FORMAT' }; 
+    }
+
+    // Search if the prefix exist and that the key not revoked
+    const keyRecord = await prisma.apiKey.findFirst({
+        where: { prefix: prefix }
+    });
+
+    if (!keyRecord) {
+        return {valid: false, errorType: 'KEY_NOT_FOUND' }; 
+    }
+
+    if (keyRecord.revokedAt !== null) {
+        return { valid: false, errorType: 'KEY_REVOKED' };
+    }
+
+    const isMatch = await bcrypt.compare(secret, keyRecord.secretHash);
+    if (!isMatch) {
+        return {valid: false, errorType: 'INVALID_MATCH' }; 
+    }
+
+    return {
+        valid: true,
+        data: {
+            accountId: keyRecord.accountId,
+            keyId: keyRecord.id
+        }
+    };
+};
+

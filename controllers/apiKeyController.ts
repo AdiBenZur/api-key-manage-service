@@ -1,7 +1,6 @@
 import { type Request, type Response } from 'express';
 import * as apiKeyService from '../services/apiKeyService.js';
 
-// First 
 export const handleCreateKey = async (req: Request, res: Response) => {
     try {
         const { accountId } = req.params;
@@ -28,7 +27,6 @@ export const handleCreateKey = async (req: Request, res: Response) => {
     }
 };
 
-// Second
 export const handleListKeys = async (req: Request, res: Response) => {
     try {
         const { accountId } = req.params;
@@ -45,7 +43,6 @@ export const handleListKeys = async (req: Request, res: Response) => {
     }
 };
 
-// Third
 export const handleRevokeKey = async (req: Request, res: Response) => {
     try {
         const { accountId, id } = req.params;
@@ -73,5 +70,38 @@ export const handleRevokeKey = async (req: Request, res: Response) => {
             console.error("Error in handle revoke Key:", error);
             return res.status(500).json({ error: "Internal Server Error." });
         }  
+    }
+};
+
+export const handleVerifyKey = async (req: Request, res: Response) => {
+    const apiKey = req.headers['x-api-key'] as string;
+
+    if (!apiKey) {
+        return res.status(401).json({ error: 'Missing API Key.' });
+    }
+
+    try {
+        const result = await apiKeyService.verifyApiKey(apiKey);
+
+        if (!result.valid) {
+            // send an error according to the Mapping
+            if (result.errorType === 'INVALID_FORMAT') {
+                return res.status(401).json({ error: 'The API key has invalid format.' });
+            }
+            if (result.errorType === 'KEY_NOT_FOUND') {
+                return res.status(401).json({ error: 'The API key does not found.' });
+            }
+            if (result.errorType === 'KEY_REVOKED') {
+                return res.status(401).json({ error: 'The API key has been revoked.' });
+            }
+            if (result.errorType === 'INVALID_MATCH') {
+                return res.status(401).json({ error: 'The API key is incorrect.' });
+            }
+        }
+
+        return res.status(200).json(result);
+        
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error' });
     }
 };
